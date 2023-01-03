@@ -1,5 +1,7 @@
 package cmdr
 
+import "github.com/vanillaos/orchid"
+
 type App struct {
 	Name        string
 	RootCommand *Command
@@ -8,10 +10,12 @@ type App struct {
 
 // NewApp creates a new command line application
 func NewApp(name string) *App {
-
+	// for application logs
+	orchid.InitLog(name, 0)
 	return &App{
 		Name: name,
-		Out:  newOut(),
+		// for console output
+		Out: newOut(),
 	}
 }
 
