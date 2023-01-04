@@ -1,26 +1,64 @@
 package cmdr
 
-import "github.com/vanillaos/orchid"
+import (
+	"errors"
+	"log"
+	"os"
+	"path"
+
+	"github.com/spf13/viper"
+	"github.com/vanillaos/orchid"
+)
 
 type App struct {
 	Name        string
 	RootCommand *Command
-	Out         *Out
 }
 
 // NewApp creates a new command line application
 func NewApp(name string) *App {
 	// for application logs
-	orchid.InitLog(name, 0)
+	orchid.InitLog(name+" : 	", 0)
+
+	viper.SetEnvPrefix(name)
+	viper.AutomaticEnv()
+
 	return &App{
 		Name: name,
-		// for console output
-		Out: newOut(),
 	}
 }
 
 func (a *App) CreateRootCommand(c *Command) {
 	a.RootCommand = c
+}
+
+func (a *App) Run() error {
+	err := a.ensureLogDir()
+	if err != nil {
+		return err
+	}
+	logDir, err := getLogDir(a.Name)
+	if err != nil {
+		return err
+	}
+	logFile := path.Join(logDir, a.Name+".log")
+	//create your file with desired read/write permissions
+	f, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer f.Close()
+
+	//set output of logs to f
+	log.SetOutput(f)
+
+	if a.RootCommand != nil {
+
+		return a.RootCommand.Execute()
+	}
+
+	return errors.New("no root command defined")
 }
 
 /*
@@ -30,3 +68,20 @@ func (a *App) CreateRootCommand(c *Command) {
 	apx.Out.Info.Println("This is information")
 
 */
+
+func (a *App) ensureLogDir() error {
+	logPath, err := getLogDir(a.Name)
+	if err != nil {
+		return err
+	}
+	return os.MkdirAll(logPath, 0755)
+}
+
+func getLogDir(app string) (string, error) {
+
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return path.Join(home, ".local", "share", app), nil
+}

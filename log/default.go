@@ -2,14 +2,18 @@ package log
 
 import (
 	l "log"
+	"strings"
 )
 
 const DefaultPrefix string = ""
 const DefaultFlags int = 0
 
+var AppName string = "orchid"
+
 // Prefix configures std log package with a prefix
 func Prefix(prefix string) {
 	l.SetPrefix(prefix)
+	AppName = strings.TrimSpace(prefix)
 }
 
 // Flags configures std log package with features
