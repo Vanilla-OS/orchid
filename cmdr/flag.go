@@ -46,3 +46,17 @@ func FlagValBool(name string) bool {
 func FlagValString(name string) string {
 	return viper.GetString(name)
 }
+func FlagValBoolDefault(name string, def bool) bool {
+	set := viper.IsSet(name)
+	if set {
+		return viper.GetBool(name)
+	}
+	return def
+}
+func FlagValStringDefault(name string, def string) string {
+	set := viper.IsSet(name)
+	if set {
+		return viper.GetString(name)
+	}
+	return def
+}
