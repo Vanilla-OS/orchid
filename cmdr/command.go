@@ -32,15 +32,30 @@ func (c *Command) AddPersistentBoolFlag(f BoolFlag) {
 	c.Command.PersistentFlags().BoolP(f.Name, f.Shorthand, f.Value, f.Usage)
 	viper.BindPFlag(f.Name, c.Command.PersistentFlags().Lookup(f.Name))
 }
-func FlagValBool(name string) bool {
-	return viper.GetBool(name)
+
+func (c *Command) AddStringFlag(f StringFlag) {
+	c.Command.Flags().StringP(f.Name, f.Shorthand, f.Value, f.Usage)
+	viper.BindPFlag(f.Name, c.Command.Flags().Lookup(f.Name))
 }
-func NewCommand(use, short string, runE func(cmd *cobra.Command, args []string) error) *Command {
+func (c *Command) AddPersistentStringFlag(f BoolFlag) {
+	c.Command.PersistentFlags().BoolP(f.Name, f.Shorthand, f.Value, f.Usage)
+	viper.BindPFlag(f.Name, c.Command.PersistentFlags().Lookup(f.Name))
+}
+
+func NewCommand(use, long, short string, runE func(cmd *cobra.Command, args []string) error) *Command {
 	cmd := &cobra.Command{
 		Use:   use,
 		Short: short,
+		Long:  long,
 		RunE:  runE,
 	}
+	return &Command{
+		Command:  cmd,
+		children: make([]*Command, 0),
+	}
+}
+
+func NewCommandCustom(cmd *cobra.Command) *Command {
 	return &Command{
 		Command:  cmd,
 		children: make([]*Command, 0),

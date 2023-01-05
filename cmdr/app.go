@@ -65,7 +65,7 @@ func (a *App) Run() error {
 
 	apx := cmdr.NewApp("apx")
 	apx.CreateRootCommand(rootCmd) // defined elsewhere
-	apx.Out.Info.Println("This is information")
+	apx.Info.Println("This is information")
 
 */
 
