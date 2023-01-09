@@ -30,6 +30,11 @@ func NewApp(name string) *App {
 
 func (a *App) CreateRootCommand(c *Command) {
 	a.RootCommand = c
+	manCmd := NewManCommand(a.Name)
+	manC := &Command{
+		Command: manCmd,
+	}
+	a.RootCommand.AddCommand(manC)
 }
 
 func (a *App) Run() error {
