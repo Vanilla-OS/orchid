@@ -1,6 +1,6 @@
 package orchid
 
-import l "github.com/vanillaos/orchid/log"
+import l "github.com/vanilla-os/orchid/log"
 
 // init sets defaults for all orchid libraries
 // that can be customized with InitXXX functions.

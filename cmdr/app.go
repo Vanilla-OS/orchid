@@ -7,7 +7,7 @@ import (
 	"path"
 
 	"github.com/spf13/viper"
-	"github.com/vanillaos/orchid"
+	"github.com/vanilla-os/orchid"
 )
 
 type App struct {

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/vanillaos/orchid/cmdr"
+	"github.com/vanilla-os/orchid/cmdr"
 )
 
 const (

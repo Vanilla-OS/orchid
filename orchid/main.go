@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/vanillaos/orchid/cmdr"
+	"github.com/vanilla-os/orchid/cmdr"
 )
 
 func main() {

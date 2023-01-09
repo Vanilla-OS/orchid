@@ -1,4 +1,4 @@
-module github.com/vanillaos/orchid
+module github.com/vanilla-os/orchid
 
 go 1.19
 
