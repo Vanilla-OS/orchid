@@ -16,3 +16,6 @@
 .envrc
 dist/
 orchid/orchid
+
+# generated man pages
+*.1
