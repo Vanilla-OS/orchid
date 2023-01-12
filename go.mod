@@ -3,6 +3,7 @@ module github.com/vanilla-os/orchid
 go 1.19
 
 require (
+	github.com/fitv/go-i18n v1.0.4
 	github.com/pterm/pterm v0.12.51
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.14.0
@@ -13,7 +14,6 @@ require (
 	atomicgo.dev/keyboard v0.2.8 // indirect
 	github.com/containerd/console v1.0.3 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
-	github.com/fitv/go-i18n v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/gookit/color v1.5.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
