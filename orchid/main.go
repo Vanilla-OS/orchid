@@ -1,15 +1,21 @@
 package main
 
 import (
+	"embed"
+
 	"github.com/vanilla-os/orchid/cmdr"
 )
 
+//go:embed locales/*.yml
+var fs embed.FS
+var oapp *cmdr.App
+
 func main() {
-	oapp := cmdr.NewApp("orchid")
-	// this is output to the user
+
+	oapp = cmdr.NewApp("orchid", fs)
 
 	// root command
-	root := cmdr.NewCommand("orchid <options>", "orchid is a cli helper for VanillaOS projects", "orchid is a cli helper for VanillaOS projects", nil)
+	root := cmdr.NewCommand(oapp.Trans("orchid.usage"), oapp.Trans("orchid.long"), oapp.Trans("orchid.short"), nil)
 	oapp.CreateRootCommand(root)
 
 	// run the app

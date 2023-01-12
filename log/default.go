@@ -1,12 +1,13 @@
 package log
 
 import (
+	"log"
 	l "log"
 	"strings"
 )
 
 const DefaultPrefix string = ""
-const DefaultFlags int = 0
+const DefaultFlags int = log.Ldate
 
 var AppName string = "orchid"
 

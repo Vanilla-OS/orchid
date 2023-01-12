@@ -1,0 +1,18 @@
+bean:
+  use: "bean"
+  long: "spanish bean is a tool for managing your vanilla pods"
+  short: "spanish bean manages pods"
+  doitFlag: "spanish do the thing"
+
+do:
+  use: "do"
+  long: "spanish do has a longer description\nthat spans several lines\nand has some line breaks and other interesting things."
+  short: "spanish do things with beans"
+  reallyFlag: "spanish really do it"
+  confirm: "spanish You are about to make a decision that will affect the rest of your life.\nHave you thought this through carefully?"
+
+roast:
+  use: "roast"
+  long: "spanish roast has a longer description\nthat spans several lines\nand has some line breaks and other interesting things."
+  short: "spanish roast warms up your beans"
+  nameFlag: "spanish name of the bean"

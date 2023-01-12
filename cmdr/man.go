@@ -9,8 +9,12 @@ package cmdr
 */
 
 import (
+	"os"
+	"path"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
+	"github.com/vanilla-os/orchid"
 )
 
 func NewManCommand(title string) *cobra.Command {
@@ -22,20 +26,18 @@ func NewManCommand(title string) *cobra.Command {
 		Hidden:                true,
 		Args:                  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			/*		manPage, err := mcoral.NewManPage(1, cmd.Root())
-					if err != nil {
-						return err
-					}
-
-					_, err = fmt.Fprint(os.Stdout, manPage.Build(roff.NewDocument()))
-					return err
-			*/
 			header := &doc.GenManHeader{
 				Title:   title,
-				Source:  "VanillaOS/orchid man page generator",
+				Source:  "VanillaOS/orchid",
+				Manual:  title + " Manual",
 				Section: "1",
 			}
-			return doc.GenManTree(cmd.Root(), header, "manpages")
+			manpath := path.Join("man", orchid.Locale())
+			err := os.MkdirAll(manpath, 0755)
+			if err != nil {
+				return err
+			}
+			return doc.GenManTree(cmd.Root(), header, manpath)
 
 		},
 	}

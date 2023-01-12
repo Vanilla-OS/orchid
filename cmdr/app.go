@@ -1,43 +1,57 @@
 package cmdr
 
 import (
+	"embed"
 	"errors"
 	"log"
 	"os"
 	"path"
 
+	"github.com/fitv/go-i18n"
 	"github.com/spf13/viper"
 	"github.com/vanilla-os/orchid"
 )
 
+// The App struct represents the cli application
+// with supporting functionality like internationalization
+// and logging.
 type App struct {
 	Name        string
 	RootCommand *Command
+	Logger      *log.Logger
+	logFile     *os.File
+	*i18n.I18n
 }
 
-// NewApp creates a new command line application
-func NewApp(name string) *App {
+// NewApp creates a new command line application.
+// It requires an embed.FS with a top level directory
+// named 'locales'.
+func NewApp(name string, locales embed.FS) *App {
 	// for application logs
-	orchid.InitLog(name+" : 	", 0)
+	orchid.InitLog(name+" : 	", log.LstdFlags)
 
 	viper.SetEnvPrefix(name)
 	viper.AutomaticEnv()
 
-	return &App{
-		Name: name,
+	i18n, err := i18n.New(locales, "locales")
+	if err != nil {
+		Error.Println(err)
+		os.Exit(1)
 	}
-}
-
-func (a *App) CreateRootCommand(c *Command) {
-	a.RootCommand = c
-	manCmd := NewManCommand(a.Name)
-	manC := &Command{
-		Command: manCmd,
+	i18n.SetDefaultLocale(orchid.Locale())
+	a := &App{
+		Name:   name,
+		Logger: log.Default(),
+		I18n:   i18n,
 	}
-	a.RootCommand.AddCommand(manC)
-}
+	err = a.logSetup()
+	if err != nil {
+		log.Printf("error setting up logging: %v", err)
+	}
+	return a
 
-func (a *App) Run() error {
+}
+func (a *App) logSetup() error {
 	err := a.ensureLogDir()
 	if err != nil {
 		return err
@@ -52,27 +66,32 @@ func (a *App) Run() error {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	defer f.Close()
+	a.logFile = f
 
 	//set output of logs to f
-	log.SetOutput(f)
+	log.SetOutput(a.logFile)
+	return nil
 
-	if a.RootCommand != nil {
-
-		return a.RootCommand.Execute()
+}
+func (a *App) CreateRootCommand(c *Command) {
+	a.RootCommand = c
+	c.DisableAutoGenTag = true
+	manCmd := NewManCommand(a.Name)
+	manC := &Command{
+		Command: manCmd,
 	}
-
-	return errors.New("no root command defined")
+	a.RootCommand.AddCommand(manC)
 }
 
-/*
-
-	apx := cmdr.NewApp("apx")
-	apx.CreateRootCommand(rootCmd) // defined elsewhere
-	apx.Info.Println("This is information")
-
-*/
+func (a *App) Run() error {
+	if a.logFile != nil {
+		defer a.logFile.Close()
+	}
+	if a.RootCommand != nil {
+		return a.RootCommand.Execute()
+	}
+	return errors.New("no root command defined")
+}
 
 func (a *App) ensureLogDir() error {
 	logPath, err := getLogDir(a.Name)
@@ -83,7 +102,6 @@ func (a *App) ensureLogDir() error {
 }
 
 func getLogDir(app string) (string, error) {
-
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", err

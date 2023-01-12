@@ -1,6 +1,10 @@
 package orchid
 
-import l "github.com/vanilla-os/orchid/log"
+import (
+	"os"
+
+	l "github.com/vanilla-os/orchid/log"
+)
 
 // init sets defaults for all orchid libraries
 // that can be customized with InitXXX functions.
@@ -19,4 +23,16 @@ func init() {
 func InitLog(prefix string, flags int) {
 	l.Prefix(prefix)
 	l.Flags(flags)
+}
+
+// Locale returns the two digit locale code
+// from the LANG environment variable, or "en"
+// if unset.
+func Locale() string {
+	lang := os.Getenv("LANG")
+	if lang == "" {
+		lang = "en"
+	}
+	locale := lang[:2]
+	return locale
 }
