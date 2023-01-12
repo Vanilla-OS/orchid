@@ -19,10 +19,11 @@ const (
 
 //go:embed locales/*.yml
 var fs embed.FS
+var bean *cmdr.App
 
 func main() {
 
-	bean := cmdr.NewApp("bean", fs)
+	bean = cmdr.NewApp("bean", fs)
 	// this is output to the user outside the scope of a command
 	cmdr.Info.Println("I'm a bean")
 	// this is written to ~/.local/share/[appname]/[appname].log
@@ -92,6 +93,15 @@ func doBean(cmd *cobra.Command, args []string) error {
 	doit := cmdr.FlagValBool(doitFlag)
 	cmdr.Info.Println("Really?", really)
 	cmdr.Info.Println("Do it?", doit)
+	b, err := cmdr.Confirm.Show(bean.Trans("do.confirm"))
+	if err != nil {
+		return err
+	}
+	if !b {
+		cmdr.Warning.Println("They didn't want to do it")
+		return nil
+	}
+
 	if !really {
 		log.Println("they didn't really want to do it")
 

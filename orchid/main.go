@@ -8,10 +8,11 @@ import (
 
 //go:embed locales/*.yml
 var fs embed.FS
+var oapp *cmdr.App
 
 func main() {
 
-	oapp := cmdr.NewApp("orchid", fs)
+	oapp = cmdr.NewApp("orchid", fs)
 
 	// root command
 	root := cmdr.NewCommand(oapp.Trans("orchid.usage"), oapp.Trans("orchid.long"), oapp.Trans("orchid.short"), nil)

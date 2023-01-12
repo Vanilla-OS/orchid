@@ -48,12 +48,10 @@ func NewApp(name string, locales embed.FS) *App {
 	if err != nil {
 		log.Printf("error setting up logging: %v", err)
 	}
-
 	return a
 
 }
 func (a *App) logSetup() error {
-
 	err := a.ensureLogDir()
 	if err != nil {
 		return err
@@ -86,18 +84,15 @@ func (a *App) CreateRootCommand(c *Command) {
 }
 
 func (a *App) Run() error {
-
 	if a.logFile != nil {
 		defer a.logFile.Close()
 	}
-
 	if a.RootCommand != nil {
-
 		return a.RootCommand.Execute()
 	}
-
 	return errors.New("no root command defined")
 }
+
 func (a *App) ensureLogDir() error {
 	logPath, err := getLogDir(a.Name)
 	if err != nil {
@@ -107,7 +102,6 @@ func (a *App) ensureLogDir() error {
 }
 
 func getLogDir(app string) (string, error) {
-
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", err

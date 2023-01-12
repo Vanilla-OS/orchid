@@ -9,6 +9,7 @@ do:
   long: "do has a longer description\nthat spans several lines\nand has some line breaks and other interesting things."
   short: "do things with beans"
   reallyFlag: "really do it"
+  confirm: "You are about to make a decision that will affect the rest of your life.\nHave you thought this through carefully?"
 
 roast:
   use: "roast"
