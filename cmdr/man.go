@@ -37,6 +37,7 @@ func NewManCommand(title string) *cobra.Command {
 			header := &doc.GenManHeader{
 				Title:   title,
 				Source:  "VanillaOS/orchid man page generator",
+				Manual:  "Some Manual",
 				Section: "1",
 			}
 			manpath := path.Join("manpages", orchid.Locale())

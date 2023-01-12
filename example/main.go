@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"errors"
 	"log"
 	"strings"
@@ -16,50 +17,46 @@ const (
 	nameFlag   string = "name"
 )
 
+//go:embed locales/*.yml
+var fs embed.FS
+
 func main() {
-	bean := cmdr.NewApp("bean")
+
+	bean := cmdr.NewApp("bean", fs)
 	// this is output to the user
 	cmdr.Info.Println("I'm a bean")
+	bean.Logger.Println("I'm written to the logs")
 
 	// root command
-	root := cmdr.NewCommand("bean <options>", `bean has a long description 
-that spans several lines
-and has some line breaks
-
-and other interesting things.`, "Bean is a test harness for orchid", nil)
+	root := cmdr.NewCommand(bean.Trans("bean.use"), bean.Trans("bean.long"), bean.Trans("bean.short"), nil)
 	bean.CreateRootCommand(root)
 	root.AddPersistentBoolFlag(
 		cmdr.NewBoolFlag(
 			doitFlag,
 			"d",
-			"do the thing",
+			bean.Trans("bean.doitFlag"),
 			false))
 
 	// first child command
-	child := cmdr.NewCommand("do", `do has a longer description 
-	that spans several lines
-	and has some line breaks
-	
-	and other interesting things.`, "Do things with beans", doBean)
+	child := cmdr.NewCommand(bean.Trans("do.use"), bean.Trans("do.long"), bean.Trans("do.short"), doBean)
 	child.AddBoolFlag(
 		cmdr.NewBoolFlag(
 			reallyFlag,
 			"r",
-			"really do it",
+			bean.Trans("do.reallyFlag"),
 			false))
 
 	root.AddCommand(child)
 
-	roast := cmdr.NewCommand("roast <color>", "long description", "Roast warms up your coffee", roast)
+	roast := cmdr.NewCommand(bean.Trans("roast.use"), bean.Trans("roast.long"), bean.Trans("roast.short"), roast)
 	roast.AddStringFlag(
 		cmdr.NewStringFlag(
 			nameFlag,
 			"n",
-			"name of the bean",
-			"",
+			bean.Trans("roast.nameFlag"),
+			"defaultedBean",
 		),
 	)
-	roast.Args = cobra.ExactArgs(1)
 	root.AddCommand(roast)
 
 	// run the app

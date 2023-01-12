@@ -25,6 +25,9 @@ func InitLog(prefix string, flags int) {
 	l.Flags(flags)
 }
 
+// Locale returns the two digit locale code
+// from the LANG environment variable, or "en"
+// if unset.
 func Locale() string {
 	lang := os.Getenv("LANG")
 	if lang == "" {

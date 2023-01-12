@@ -1,5 +1,5 @@
 orchid:
-  usage: "orchid <options>"
+  usage: "orchid"
   long: "orchid is a cli helper for VanillaOS projects long"
   short: "orchid is a cli helper for VanillaOS projects short"
 

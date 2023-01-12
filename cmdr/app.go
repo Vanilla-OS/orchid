@@ -1,11 +1,13 @@
 package cmdr
 
 import (
+	"embed"
 	"errors"
 	"log"
 	"os"
 	"path"
 
+	"github.com/fitv/go-i18n"
 	"github.com/spf13/viper"
 	"github.com/vanilla-os/orchid"
 )
@@ -13,31 +15,39 @@ import (
 type App struct {
 	Name        string
 	RootCommand *Command
+	Logger      *log.Logger
+	logFile     *os.File
+	*i18n.I18n
 }
 
 // NewApp creates a new command line application
-func NewApp(name string) *App {
+func NewApp(name string, locales embed.FS) *App {
 	// for application logs
-	orchid.InitLog(name+" : 	", 0)
+	orchid.InitLog(name+" : 	", log.LstdFlags)
 
 	viper.SetEnvPrefix(name)
 	viper.AutomaticEnv()
-
-	return &App{
-		Name: name,
+	i18n, err := i18n.New(locales, "locales")
+	if err != nil {
+		Error.Println(err)
+		os.Exit(1)
 	}
-}
-
-func (a *App) CreateRootCommand(c *Command) {
-	a.RootCommand = c
-	manCmd := NewManCommand(a.Name)
-	manC := &Command{
-		Command: manCmd,
+	i18n.SetDefaultLocale(orchid.Locale())
+	a := &App{
+		Name:   name,
+		Logger: log.Default(),
+		I18n:   i18n,
 	}
-	a.RootCommand.AddCommand(manC)
-}
+	err = a.logSetup()
+	if err != nil {
+		log.Printf("error setting up logging: %v", err)
+	}
 
-func (a *App) Run() error {
+	return a
+
+}
+func (a *App) logSetup() error {
+
 	err := a.ensureLogDir()
 	if err != nil {
 		return err
@@ -52,11 +62,28 @@ func (a *App) Run() error {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	defer f.Close()
+	a.logFile = f
 
 	//set output of logs to f
-	log.SetOutput(f)
+	log.SetOutput(a.logFile)
+	return nil
+
+}
+func (a *App) CreateRootCommand(c *Command) {
+	a.RootCommand = c
+	c.DisableAutoGenTag = true
+	manCmd := NewManCommand(a.Name)
+	manC := &Command{
+		Command: manCmd,
+	}
+	a.RootCommand.AddCommand(manC)
+}
+
+func (a *App) Run() error {
+
+	if a.logFile != nil {
+		defer a.logFile.Close()
+	}
 
 	if a.RootCommand != nil {
 
@@ -65,15 +92,6 @@ func (a *App) Run() error {
 
 	return errors.New("no root command defined")
 }
-
-/*
-
-	apx := cmdr.NewApp("apx")
-	apx.CreateRootCommand(rootCmd) // defined elsewhere
-	apx.Info.Println("This is information")
-
-*/
-
 func (a *App) ensureLogDir() error {
 	logPath, err := getLogDir(a.Name)
 	if err != nil {

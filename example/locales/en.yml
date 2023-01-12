@@ -1,0 +1,17 @@
+bean:
+  use: "bean"
+  long: "bean is a tool for managing your vanilla pods"
+  short: "bean manages pods"
+  doitFlag: "do the thing"
+
+do:
+  use: "do"
+  long: "do has a longer description\nthat spans several lines\nand has some line breaks and other interesting things."
+  short: "do things with beans"
+  reallyFlag: "really do it"
+
+roast:
+  use: "roast"
+  long: "roast has a longer description\nthat spans several lines\nand has some line breaks and other interesting things."
+  short: "roast warms up your beans"
+  nameFlag: "name of the bean"
