@@ -12,6 +12,9 @@ import (
 	"github.com/vanilla-os/orchid"
 )
 
+// The App struct represents the cli application
+// with supporting functionality like internationalization
+// and logging.
 type App struct {
 	Name        string
 	RootCommand *Command
@@ -20,13 +23,16 @@ type App struct {
 	*i18n.I18n
 }
 
-// NewApp creates a new command line application
+// NewApp creates a new command line application.
+// It requires an embed.FS with a top level directory
+// named 'locales'.
 func NewApp(name string, locales embed.FS) *App {
 	// for application logs
 	orchid.InitLog(name+" : 	", log.LstdFlags)
 
 	viper.SetEnvPrefix(name)
 	viper.AutomaticEnv()
+
 	i18n, err := i18n.New(locales, "locales")
 	if err != nil {
 		Error.Println(err)

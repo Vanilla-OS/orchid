@@ -23,40 +23,56 @@ var fs embed.FS
 func main() {
 
 	bean := cmdr.NewApp("bean", fs)
-	// this is output to the user
+	// this is output to the user outside the scope of a command
 	cmdr.Info.Println("I'm a bean")
+	// this is written to ~/.local/share/[appname]/[appname].log
 	bean.Logger.Println("I'm written to the logs")
 
 	// root command
-	root := cmdr.NewCommand(bean.Trans("bean.use"), bean.Trans("bean.long"), bean.Trans("bean.short"), nil)
+	root := cmdr.NewCommand(
+		bean.Trans("bean.use"),
+		bean.Trans("bean.long"),
+		bean.Trans("bean.short"),
+		nil).
+		WithPersistentBoolFlag(
+			cmdr.NewBoolFlag(
+				doitFlag,
+				"d",
+				bean.Trans("bean.doitFlag"),
+				false))
+
 	bean.CreateRootCommand(root)
-	root.AddPersistentBoolFlag(
-		cmdr.NewBoolFlag(
-			doitFlag,
-			"d",
-			bean.Trans("bean.doitFlag"),
-			false))
 
 	// first child command
-	child := cmdr.NewCommand(bean.Trans("do.use"), bean.Trans("do.long"), bean.Trans("do.short"), doBean)
-	child.AddBoolFlag(
-		cmdr.NewBoolFlag(
-			reallyFlag,
-			"r",
-			bean.Trans("do.reallyFlag"),
-			false))
+	child := cmdr.NewCommand(
+		bean.Trans("do.use"),
+		bean.Trans("do.long"),
+		bean.Trans("do.short"),
+		doBean).
+		WithBoolFlag(
+			cmdr.NewBoolFlag(
+				reallyFlag,
+				"r",
+				bean.Trans("do.reallyFlag"),
+				false))
+	child.Example = "bean do -r"
 
 	root.AddCommand(child)
 
-	roast := cmdr.NewCommand(bean.Trans("roast.use"), bean.Trans("roast.long"), bean.Trans("roast.short"), roast)
-	roast.AddStringFlag(
-		cmdr.NewStringFlag(
-			nameFlag,
-			"n",
-			bean.Trans("roast.nameFlag"),
-			"defaultedBean",
-		),
-	)
+	roast := cmdr.NewCommand(
+		bean.Trans("roast.use"),
+		bean.Trans("roast.long"),
+		bean.Trans("roast.short"),
+		roast).
+		WithStringFlag(
+			cmdr.NewStringFlag(
+				nameFlag,
+				"n",
+				bean.Trans("roast.nameFlag"),
+				"defaultedBean",
+			),
+		)
+	roast.Example = "bean roast -n arabica"
 	root.AddCommand(roast)
 
 	// run the app
@@ -77,9 +93,9 @@ func doBean(cmd *cobra.Command, args []string) error {
 	cmdr.Info.Println("Really?", really)
 	cmdr.Info.Println("Do it?", doit)
 	if !really {
-		log.Println("bad")
+		log.Println("they didn't really want to do it")
 
-		return errors.New("don't do it")
+		return errors.New("didn't do it, supply -r flag to make it happen")
 	}
 
 	pb, _ := cmdr.ProgressBar.WithTotal(3).WithTitle("Your Mom").Start()

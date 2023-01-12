@@ -26,21 +26,13 @@ func NewManCommand(title string) *cobra.Command {
 		Hidden:                true,
 		Args:                  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			/*		manPage, err := mcoral.NewManPage(1, cmd.Root())
-					if err != nil {
-						return err
-					}
-
-					_, err = fmt.Fprint(os.Stdout, manPage.Build(roff.NewDocument()))
-					return err
-			*/
 			header := &doc.GenManHeader{
 				Title:   title,
-				Source:  "VanillaOS/orchid man page generator",
-				Manual:  "Some Manual",
+				Source:  "VanillaOS/orchid",
+				Manual:  title + " Manual",
 				Section: "1",
 			}
-			manpath := path.Join("manpages", orchid.Locale())
+			manpath := path.Join("man", orchid.Locale())
 			err := os.MkdirAll(manpath, 0755)
 			if err != nil {
 				return err
