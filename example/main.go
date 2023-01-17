@@ -23,9 +23,9 @@ var bean *cmdr.App
 
 func main() {
 
-	bean = cmdr.NewApp("bean", fs)
+	bean = cmdr.NewApp("bean", "0.1.1", fs)
 	// this is output to the user outside the scope of a command
-	cmdr.Info.Println("I'm a bean")
+	//cmdr.Info.Println("I'm a bean")
 	// this is written to ~/.local/share/[appname]/[appname].log
 	bean.Logger.Println("I'm written to the logs")
 
