@@ -6,13 +6,15 @@ bean:
 
 do:
   use: "do"
-  long: "do has a longer description\nthat spans several lines\nand has some line breaks and other interesting things."
+  long: |
+      do has a longer description that spans several lines and has some line breaks and other interesting things.
+      This is a second paragraph and it will be obvious that there is a line break.
   short: "do things with beans"
   reallyFlag: "really do it"
   confirm: "You are about to make a decision that will affect the rest of your life.\nHave you thought this through carefully?"
 
 roast:
   use: "roast"
-  long: "roast has a longer description\nthat spans several lines\nand has some line breaks and other interesting things."
+  long: "roast has a longer description that spans several lines and has some line breaks and other interesting things."
   short: "roast warms up your beans"
   nameFlag: "name of the bean"
