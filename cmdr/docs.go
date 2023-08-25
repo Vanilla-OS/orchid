@@ -1,81 +1,65 @@
 package cmdr
 
-/* License: GPLv3
-Authors:
-    Mirko Brombin <send@mirko.pm>
-    Pietro di Caprio <pietro@fabricators.ltd>
-Copyright: 2023
-Description: Orchid is a cli helper for Vanilla OS projects
+/*	License: GPLv3
+	Authors:
+		Mirko Brombin <send@mirko.pm>
+		Pietro di Caprio <pietro@fabricators.ltd>
+	Copyright: 2023
+	Description: Orchid is a cli helper for VanillaOS projects
 */
 
 import (
-    "fmt"
-    "log"
-    "os"
-    "path"
-    "path/filepath"
-    "strings"
-    "time"
+	"fmt"
+	"log"
+	"path"
+	"path/filepath"
+	"strings"
 
-    "github.com/spf13/cobra"
-    "github.com/spf13/cobra/doc"
+	"github.com/spf13/cobra"
+	"github.com/spf13/cobra/doc"
 )
 
 func NewDocsCommand(a *App) *Command {
-    c := &Command{}
-    cmd := &cobra.Command{
-        Use:                   "docs",
-        Short:                 "Generates documentation for the cli application in the current directory.",
-        SilenceUsage:          true,
-        DisableFlagsInUseLine: true,
-        Hidden:                true,
-        Args:                  cobra.NoArgs,
-        RunE: func(cmd *cobra.Command, args []string) error {
-            filePrepender := func(filename string) string {
-                name := filepath.Base(filename)
-                base := strings.TrimSuffix(name, path.Ext(name))
-                title := capitalizeFirst(base)
-                creationDate := getFileCreationDate(filename).Format("2006-01-02")
-                return fmt.Sprintf(fmTemplate, title, title, creationDate)
-            }
+	c := &Command{}
+	cmd := &cobra.Command{
+		Use:                   "docs",
+		Short:                 "Generates documentation for the cli application in the current directory.",
+		SilenceUsage:          true,
+		DisableFlagsInUseLine: true,
+		Hidden:                true,
+		Args:                  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			filePrepender := func(filename string) string {
+				name := filepath.Base(filename)
+				base := strings.TrimSuffix(name, path.Ext(name))
+				return fmt.Sprintf(fmTemplate, strings.Replace(base, "_", " ", -1), strings.Replace(base, "_", " ", -1))
+			}
+			linkHandler := func(name string) string {
+				base := strings.TrimSuffix(name, path.Ext(name))
+				return strings.ToLower(base) + "/"
+			}
+			/*	err := doc.GenMarkdownTree(cmd.Root(), "./")
+				if err != nil {
+					log.Fatal(err)
+				}
+			*/
+			err := doc.GenMarkdownTreeCustom(cmd.Root(), "./", filePrepender, linkHandler)
 
-            // Generate documentation
-            err := doc.GenMarkdownTreeCustom(cmd.Root(), "./", filePrepender, func(name string) string {
-                base := strings.TrimSuffix(name, path.Ext(name))
-                return strings.ToLower(base) + "/"
-            })
+			if err != nil {
+				log.Fatal(err)
+			}
+			return nil
 
-            if err != nil {
-                log.Fatal(err)
-            }
+		},
+	}
+	c.Command = cmd
+	return c
 
-            return nil
-        },
-    }
-    c.Command = cmd
-    return c
-}
-
-func capitalizeFirst(s string) string {
-    if len(s) == 0 {
-        return s
-    }
-    return strings.ToUpper(s[:1]) + s[1:]
-}
-
-func getFileCreationDate(filename string) time.Time {
-    fileInfo, err := os.Stat(filename)
-    if err != nil {
-        log.Fatal(err)
-    }
-    return fileInfo.ModTime()
 }
 
 const fmTemplate = `---
-Title: %s Manpage
-Description: Manpage for the %s utility.
-PublicationDate: %s
-Authors: Contributors of Vanilla OS
----
+title: "%s"
+description: %s
 
+---
 `
