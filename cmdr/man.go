@@ -5,7 +5,7 @@ package cmdr
 		Mirko Brombin <send@mirko.pm>
 		Pietro di Caprio <pietro@fabricators.ltd>
 	Copyright: 2023
-	Description: Orchid is a cli helper for VanillaOS projects
+	Description: Orchid is a cli helper for Vanilla OS projects
 */
 
 import (
