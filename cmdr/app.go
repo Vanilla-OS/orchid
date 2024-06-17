@@ -55,8 +55,8 @@ func NewApp(name string, version string, locales embed.FS) *App {
 		log.Printf("error setting up logging: %v", err)
 	}
 	return a
-
 }
+
 func getLocale(locales embed.FS) string {
 	found := orchid.Locale()
 	// if the found locale is not supported by the orchid app (it does not
@@ -78,26 +78,45 @@ func (a *App) logSetup() error {
 		return err
 	}
 	logFile := path.Join(logDir, a.Name+".log")
-	//create your file with desired read/write permissions
-	f, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	// create your file with desired read/write permissions
+	f, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0o644)
 	if err != nil {
 		log.Fatal(err)
 	}
 	a.logFile = f
 
-	//set output of logs to f
+	// set output of logs to f
 	log.SetOutput(a.logFile)
 	return nil
-
 }
-func (a *App) CreateRootCommand(c *Command) {
+
+// CreateRootCommand sets c as the root command for App.
+// Optionally, the user can override display messages for --help and
+// --version, respectively.
+func (a *App) CreateRootCommand(c *Command, flagCmds ...string) {
 	a.RootCommand = c
 	c.DisableAutoGenTag = true
 	manCmd := NewManCommand(a)
 	a.RootCommand.AddCommand(manCmd)
-
 	docsCmd := NewDocsCommand(a)
 	a.RootCommand.AddCommand(docsCmd)
+
+	if len(flagCmds) > 0 {
+		helpMsg := flagCmds[0]
+		a.RootCommand.WithBoolFlag(NewBoolFlag("help", "h", helpMsg, false))
+	}
+	if len(flagCmds) > 1 {
+		versionMsg := flagCmds[1]
+		a.RootCommand.WithBoolFlag(NewBoolFlag("version", "v", versionMsg, false))
+	}
+}
+
+// SetUsageStrings sets msgs as the placeholders for the usage string. Use this
+// to properly localize the usage message.
+func (a *App) SetUsageStrings(msgs UsageStrings) {
+	if a.RootCommand != nil {
+		a.RootCommand.setUsageTemplatePlaceholders(msgs)
+	}
 }
 
 func (a *App) Run() error {
@@ -115,7 +134,7 @@ func (a *App) ensureLogDir() error {
 	if err != nil {
 		return err
 	}
-	return os.MkdirAll(logPath, 0755)
+	return os.MkdirAll(logPath, 0o755)
 }
 
 func getLogDir(app string) (string, error) {
@@ -145,12 +164,10 @@ func (a *App) rootDocs(d *roff.Document) {
 	d.Paragraph()
 	d.Text("GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.")
 	d.EndSection()
-
 }
 
 func (a *App) docHeading(d *roff.Document) {
 	d.Heading(1, a.Name, "User Manual", time.Now())
-
 }
 
 func (a *App) docName(d *roff.Document) {
@@ -172,13 +189,11 @@ func (a *App) docDescription(d *roff.Document) {
 	d.Indent(4)
 	d.Text(a.RootCommand.Long)
 	d.IndentEnd()
-
 }
 
 func (a *App) docOptions(d *roff.Document) {
 	d.Section("Options")
 	d.Text(a.RootCommand.Flags().FlagUsages())
-
 }
 
 func (a *App) docCommands(d *roff.Document) {
