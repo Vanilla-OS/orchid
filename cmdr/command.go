@@ -1,10 +1,84 @@
 package cmdr
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/vanilla-os/orchid/roff"
 )
+
+/*
+Template when printing usage (either in help or invalid command).
+Placeholders should contain, respectively, the localized equivalent of:
+
+	"Usage"
+	"Aliases"
+	"Examples"
+	"Available Commands"
+	"Additional Commands"
+	"Flags"
+	"Global Flags"
+	"Additional help topics"
+	"Use %s for more information about a command"
+*/
+const usageTemplate = `%s:{{if .Runnable}}
+  {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
+  {{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
+
+%s:
+  {{.NameAndAliases}}{{end}}{{if .HasExample}}
+
+%s:
+{{.Example}}{{end}}{{if .HasAvailableSubCommands}}{{$cmds := .Commands}}{{if eq (len .Groups) 0}}
+
+%s:{{range $cmds}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
+  {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{else}}{{range $group := .Groups}}
+
+{{.Title}}{{range $cmds}}{{if (and (eq .GroupID $group.ID) (or .IsAvailableCommand (eq .Name "help")))}}
+  {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if not .AllChildCommandsHaveGroup}}
+
+%s:{{range $cmds}}{{if (and (eq .GroupID "") (or .IsAvailableCommand (eq .Name "help")))}}
+  {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
+
+%s:
+{{.LocalFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
+
+%s:
+{{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasHelpSubCommands}}
+
+%s:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
+  {{rpad .CommandPath .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
+
+%s.{{end}}
+`
+
+// UsageStrings contains all placeholders for the usage message
+type UsageStrings struct {
+	Usage                string
+	Aliases              string
+	Examples             string
+	AvailableCommands    string
+	AdditionalCommands   string
+	Flags                string
+	GlobalFlags          string
+	AdditionalHelpTopics string
+	MoreInfo             string
+}
+
+func (u UsageStrings) asSlice() []any {
+	return []any{
+		u.Usage,
+		u.Aliases,
+		u.Examples,
+		u.AvailableCommands,
+		u.AdditionalCommands,
+		u.Flags,
+		u.GlobalFlags,
+		u.AdditionalHelpTopics,
+		u.MoreInfo,
+	}
+}
 
 // Command represents a cli command which
 // may have flags, arguments, and children commands.
@@ -137,7 +211,6 @@ func (c *Command) docDescription(d *roff.Document) {
 	d.Text(c.Long)
 	d.IndentEnd()
 	d.EndSection()
-
 }
 
 func (c *Command) docOptions(d *roff.Document) {
@@ -147,6 +220,7 @@ func (c *Command) docOptions(d *roff.Document) {
 	d.Text(c.Parent().PersistentFlags().FlagUsages())
 	d.EndSection()
 }
+
 func (c *Command) docExamples(d *roff.Document) {
 	if c.Example == "" {
 		return
@@ -156,7 +230,6 @@ func (c *Command) docExamples(d *roff.Document) {
 	d.Text(c.Example)
 	d.IndentEnd()
 	d.EndSection()
-
 }
 
 func (c *Command) docCommands(d *roff.Document) {
@@ -175,4 +248,9 @@ func (c *Command) docCommands(d *roff.Document) {
 		d.Text(child.Short + "\n")
 		d.IndentEnd()
 	}
+}
+
+func (c *Command) setUsageTemplatePlaceholders(msgs UsageStrings) {
+	msgs.MoreInfo = fmt.Sprintf(msgs.MoreInfo, "\"{{.CommandPath}} [command] --help\"")
+	c.SetUsageTemplate(fmt.Sprintf(usageTemplate, msgs.asSlice()...))
 }
