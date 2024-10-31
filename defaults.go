@@ -2,6 +2,7 @@ package orchid
 
 import (
 	"os"
+	"strings"
 
 	l "github.com/vanilla-os/orchid/log"
 )
@@ -29,10 +30,20 @@ func InitLog(prefix string, flags int) {
 // from the LANG environment variable, or "en"
 // if unset.
 func Locale() string {
-	lang := os.Getenv("LANG")
-	if lang == "" {
-		lang = "en"
+	var locale string
+	for _, env := range []string{"LC_ALL", "LC_MESSAGES", "LANG"} {
+		locale = os.Getenv(env)
+		if strings.TrimSpace(locale) != "" {
+			break
+		}
 	}
-	locale := lang[:2]
+	if strings.TrimSpace(locale) == "C" || strings.TrimSpace(locale) == "POSIX" {
+		return strings.TrimSpace(locale)
+	}
+
+	langs := strings.Split(os.Getenv("LANGUAGE"), ":")
+	if len(langs) > 0 {
+		return strings.Split(langs[0], "_")[0]
+	}
 	return locale
 }
